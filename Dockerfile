@@ -39,17 +39,31 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y openssh-server \
     && rm -rf /var/lib/apt/lists/*
 RUN sed -i /etc/ssh/sshd_config \
-        -e 's/#PermitRootLogin.*/PermitRootLogin no/' \
-        -e 's/#RSAAuthentication.*/RSAAuthentication yes/'  \
-        -e 's/#PasswordAuthentication.*/PasswordAuthentication no/' \
-        -e 's/#SyslogFacility.*/SyslogFacility AUTH/' \
-        -e 's/#LogLevel.*/LogLevel INFO/' && \
+    -e 's/#PermitRootLogin.*/PermitRootLogin no/' \
+    -e 's/#RSAAuthentication.*/RSAAuthentication yes/'  \
+    -e 's/#PasswordAuthentication.*/PasswordAuthentication no/' \
+    -e 's/#SyslogFacility.*/SyslogFacility AUTH/' \
+    -e 's/#LogLevel.*/LogLevel INFO/' && \
     mkdir /var/run/sshd
 
 VOLUME "${JENKINS_AGENT_HOME}" "/tmp" "/run" "/var/run"
 WORKDIR "${JENKINS_AGENT_HOME}"
 
 COPY setup-sshd /usr/local/bin/setup-sshd
+
+# install dotnet
+ENV DOTNET_RUNTIME_VERSION=2.0.6 \
+    DOTNET_SDK_VERSION=2.1.4
+
+RUN apt-get update                                                          && \
+    apt-get install -y --no-install-recommends wget ruby curl apt-transport-https gpg && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor     \
+    > /etc/apt/trusted.gpg.d/microsoft.gpg                              && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" \
+    > /etc/apt/sources.list.d/dotnetdev.list                            && \
+    apt-get update                                                          && \
+    apt-get install -y --no-install-recommends dotnet-runtime-$DOTNET_RUNTIME_VERSION dotnet-sdk-$DOTNET_SDK_VERSION
+
 
 EXPOSE 22
 
