@@ -52,8 +52,8 @@ WORKDIR "${JENKINS_AGENT_HOME}"
 COPY setup-sshd /usr/local/bin/setup-sshd
 
 # install dotnet
-ENV DOTNET_RUNTIME_VERSION=2.0.6 \
-    DOTNET_SDK_VERSION=2.1.4
+# ENV DOTNET_RUNTIME_VERSION=2.0.6 \
+#    DOTNET_SDK_VERSION=2.1.4
 
 EXPOSE 22
 
