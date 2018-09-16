@@ -58,4 +58,6 @@ fi
 env | grep _ >> /etc/environment
 
 ssh-keygen -A
+
+cat /etc/os-release
 exec /usr/sbin/sshd -D -e "${@}"

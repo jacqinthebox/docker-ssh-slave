@@ -36,7 +36,7 @@ RUN groupadd -g ${gid} ${group} \
 
 # setup SSH server
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y openssh-server \
+    && apt-get install --no-install-recommends -y openssh-server  apt-transport-https \
     && rm -rf /var/lib/apt/lists/*
 RUN sed -i /etc/ssh/sshd_config \
     -e 's/#PermitRootLogin.*/PermitRootLogin no/' \
@@ -51,9 +51,13 @@ WORKDIR "${JENKINS_AGENT_HOME}"
 
 COPY setup-sshd /usr/local/bin/setup-sshd
 
-# install dotnet
-# ENV DOTNET_RUNTIME_VERSION=2.0.6 \
-#    DOTNET_SDK_VERSION=2.1.4
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg \ 
+    && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \ 
+    && wget -q https://packages.microsoft.com/config/debian/9/prod.list \
+    && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
+    && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
+    && chown root:root /etc/apt/sources.list.d/microsoft-prod.list \
+    && apt-get update && apt-get install dotnet-sdk-2.1 -y
 
 EXPOSE 22
 
