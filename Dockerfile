@@ -51,13 +51,15 @@ WORKDIR "${JENKINS_AGENT_HOME}"
 
 COPY setup-sshd /usr/local/bin/setup-sshd
 
-RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg \ 
-    && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \ 
-    && wget -q https://packages.microsoft.com/config/debian/9/prod.list \
-    && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
-    && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
-    && chown root:root /etc/apt/sources.list.d/microsoft-prod.list \
-    && apt-get update && apt-get install dotnet-sdk-2.1 -y
+RUN apt-get update && apt-get -y install ca-certificates curl gnupg2 software-properties-common \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
+    && add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/debian \
+    $(lsb_release -cs) \
+    stable" \
+    && apt-get update && apt-get -y install docker-ce
+
+RUN usermod -a -G docker jenkins
 
 EXPOSE 22
 
